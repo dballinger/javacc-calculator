@@ -1,0 +1,73 @@
+options {STATIC=false;}
+PARSER_BEGIN(ArithmeticParser)
+
+package com.braxisltd.calculator;
+
+import java.io.StringReader;
+import java.io.Reader;
+import com.braxisltd.calculator.*;
+
+public class ArithmeticParser {
+
+    private Expression expression;
+
+    public ArithmeticParser(String s)
+    {
+        this((Reader)(new StringReader(s)));
+    }
+
+    public Value evaluate() {
+        return expression.evaluate();
+    }
+}
+PARSER_END(ArithmeticParser)
+
+SKIP :
+{
+    " "
+    | "\t"
+    | "\r"
+    | "\n"
+}
+
+TOKEN: /*RESERVED TOKENS FOR UQL */
+{
+      <EQUALS: "=">
+   |  <MULTIPLY:  "*">
+   |  <DIVIDE: "/">
+   |  <ADD: "+">
+   |  <SUBTRACT: "-">
+   |  <LPAREN: "(">
+   |  <RPAREN: ")">
+}
+
+TOKEN :
+{
+      <VALUE : (["0"-"9"])+|((["0"-"9"])+(".")(["0"-"9"])+) >
+}
+
+void parse():
+{
+
+}
+{
+    calculation()
+}
+
+void calculation():
+{
+    Token tOperandLeft, tOperandRight;
+    Operator operator = null;
+}
+{
+    (tOperandLeft = <VALUE>)
+    (<MULTIPLY> {operator = new Multiply();}|
+     <DIVIDE> {operator = new Divide();}|
+     <ADD> {operator = new Add();}|
+     <SUBTRACT> {operator = new Subtract();})
+    (tOperandRight = <VALUE>)
+    {
+        System.out.println("Calculation: " + tOperandLeft.image + operator + tOperandRight.image);
+        expression = new Expression(new Value(tOperandLeft.image), new Value(tOperandRight.image), operator);
+    }
+}
